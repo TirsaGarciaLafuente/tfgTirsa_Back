@@ -1,0 +1,15 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: break_room_db_container
+    restart: always
+    environment:
+      MYSQL_DATABASE: break_room_db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
