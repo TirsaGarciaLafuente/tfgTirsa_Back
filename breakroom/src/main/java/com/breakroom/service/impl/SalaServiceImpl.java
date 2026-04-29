@@ -90,4 +90,14 @@ public class SalaServiceImpl implements SalaService{
         dto.setFechaCreacion(sala.getFechaCreacion());
         return dto;
     }
+    
+    @Override
+    public SalaDto obtenerPorId(Long id) {
+        // 1. Buscamos la sala por ID
+        Sala sala = salaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sala no encontrada con ID: " + id));
+
+        // 2. Reutilizamos tu método mapearADto para devolver el DTO
+        return mapearADto(sala);
+    }
 }

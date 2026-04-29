@@ -47,4 +47,14 @@ public class SalaController {
         List<SalaDto> salas = salaService.listarSalasPorUsuario(usuarioId);
         return ResponseEntity.ok(salas);
     }
+    
+    /**
+     * Obtiene los detalles de una sala específica por su ID.
+     * Endpoint: GET /api/salas/1
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<SalaDto> obtenerPorId(@PathVariable Long id) {
+        SalaDto sala = salaService.obtenerPorId(id);
+        return ResponseEntity.ok(sala);
+    }
 }
