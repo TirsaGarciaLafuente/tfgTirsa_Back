@@ -54,11 +54,16 @@ public class SalaServiceImpl implements SalaService{
         Sala sala = salaRepository.findByCodSala(codSala)
                 .orElseThrow(() -> new RuntimeException("El código de sala no existe"));
 
+        // --> RESTRICCIÓN DE AFORO <--
+        if (sala.getMiembros().size() >= 8) {
+            throw new RuntimeException("La sala ya está llena");
+        }
+
         // 2. Buscamos al usuario que quiere entrar
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 3. Añadimos el usuario a la sala (el Set evita duplicados)
+        // 3. Añadimos el usuario a la sala
         sala.getMiembros().add(usuario);
 
         // 4. Guardamos los cambios y devolvemos DTO
