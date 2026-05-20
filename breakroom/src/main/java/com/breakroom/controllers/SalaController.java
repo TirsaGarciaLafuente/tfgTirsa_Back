@@ -1,5 +1,6 @@
 package com.breakroom.controllers;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.breakroom.Models.DTO.SalaDto;
+import com.breakroom.security.JwtUtil;
 import com.breakroom.service.SalaService;
 
 @RestController 
@@ -15,6 +17,9 @@ public class SalaController {
 	
 	@Autowired
 	private SalaService salaService;
+	
+	@Autowired
+	private JwtUtil jwtUtil;
 
     /**
      * Crea una nueva sala y asigna al usuario como creador/miembro.
@@ -22,8 +27,9 @@ public class SalaController {
      * @param usuarioId El ID del usuario que la crea.
      */
 	@PostMapping("/crear")
-    public ResponseEntity<SalaDto> crear(@RequestParam String nombre, @RequestParam Long usuarioId) {	
+    public ResponseEntity<SalaDto> crear(@RequestParam String nombre, @RequestHeader("Authorization") String authHeader) {	
         // Llamamos al servicio que gestiona la lógica de creación y código único
+		Long usuarioId = jwtUtil.extraerId(authHeader);
         return ResponseEntity.ok(salaService.crearSala(nombre, usuarioId));
     }
 
@@ -33,7 +39,8 @@ public class SalaController {
      * @param usuarioId ID del usuario que se quiere unir.
      */
     @PostMapping("/unirse")
-    public ResponseEntity<SalaDto> unirse(@RequestParam String codSala, @RequestParam Long usuarioId) {
+    public ResponseEntity<SalaDto> unirse(@RequestParam String codSala, @RequestHeader("Authorization") String authHeader) {
+    	Long usuarioId = jwtUtil.extraerId(authHeader);
         // El servicio validará si la sala existe y si hay menos de 5 miembros
         return ResponseEntity.ok(salaService.unirseConCodigo(codSala, usuarioId));
     }
@@ -42,8 +49,9 @@ public class SalaController {
      * Obtiene todas las salas a las que pertenece un usuario.
      * Endpoint: GET /api/salas/usuario/1
      */
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<SalaDto>> listarPorUsuario(@PathVariable Long usuarioId) {
+    @GetMapping("/usuario")
+    public ResponseEntity<List<SalaDto>> listarPorUsuario(@RequestHeader("Authorization") String authHeader) {
+    	Long usuarioId = jwtUtil.extraerId(authHeader);
         List<SalaDto> salas = salaService.listarSalasPorUsuario(usuarioId);
         return ResponseEntity.ok(salas);
     }

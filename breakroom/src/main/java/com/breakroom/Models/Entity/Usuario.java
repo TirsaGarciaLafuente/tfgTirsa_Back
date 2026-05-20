@@ -27,5 +27,8 @@ public class Usuario {
     
     @Column(name="Nombre")
     private String nombre;
-
+    
+    public Usuario(Long id) {
+        this.id = id;
+    }
 }
