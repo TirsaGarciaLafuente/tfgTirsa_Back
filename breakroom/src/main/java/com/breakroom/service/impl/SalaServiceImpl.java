@@ -1,6 +1,7 @@
 package com.breakroom.service.impl;
 
 import com.breakroom.Models.DTO.SalaDto;
+import com.breakroom.Models.DTO.UsuarioDto;
 import com.breakroom.Models.Entity.Sala;
 import com.breakroom.Models.Entity.Usuario;
 import com.breakroom.repository.SalaRepository;
@@ -93,6 +94,23 @@ public class SalaServiceImpl implements SalaService{
         dto.setNombre(sala.getNombre());
         dto.setCodSala(sala.getCodSala());
         dto.setFechaCreacion(sala.getFechaCreacion());
+        
+        // NUEVA LÓGICA: Mapeamos la lista de miembros de la entidad a UsuarioDto en el DTO
+        if (sala.getMiembros() != null) {
+            List<UsuarioDto> listaUsuariosDto = sala.getMiembros().stream()
+                .map(usuario -> {
+                    UsuarioDto uDto = new UsuarioDto();
+                    uDto.setId(usuario.getId());
+                    uDto.setNombre(usuario.getNombre());
+                    uDto.setEmail(usuario.getEmail());
+                    // Si tu UsuarioDto tiene un setUsername, puedes añadirlo aquí si lo necesitas
+                    return uDto;
+                })
+                .collect(Collectors.toList());
+            
+            dto.setUsuarios(listaUsuariosDto);
+        }
+        
         return dto;
     }
     
