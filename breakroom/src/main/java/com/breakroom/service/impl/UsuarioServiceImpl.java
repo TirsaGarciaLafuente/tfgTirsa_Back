@@ -70,4 +70,16 @@ public class UsuarioServiceImpl implements UsuarioService{
 	    usuario.setPassword(passwordEncoder.encode(password));
 	    usuarioRepository.save(usuario);
 	}
+
+	// --- NUEVO MÉTODO IMPLEMENTADO CON TU PROPIA LÓGICA ---
+	@Override
+	public Long obtenerIdPorUsername(String username) {
+		Usuario usuario = usuarioRepository.findByUsername(username);
+		
+		if (usuario == null) {
+			throw new RuntimeException("Usuario no encontrado con el username: " + username);
+		}
+		
+		return usuario.getId();
+	}
 }

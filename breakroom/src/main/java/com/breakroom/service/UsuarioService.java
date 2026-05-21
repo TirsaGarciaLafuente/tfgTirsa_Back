@@ -6,14 +6,13 @@ import com.breakroom.Models.DTO.UsuarioDto;
 
 public interface UsuarioService {
 	
-	public UsuarioDto login (LoginDto loginDto);
+    UsuarioDto login (LoginDto loginDto);
 	
-	public UsuarioDto registro (RegistroDto registroDto);
+    UsuarioDto registro (RegistroDto registroDto);
 	
-	boolean verificarUsuario(String email, String username);
+    boolean verificarUsuario(String email, String username);
 	
-	void cambiarPassword(String email, String username, String password);
+    void cambiarPassword(String email, String username, String password);
 	
-	
-
+    Long obtenerIdPorUsername(String username);
 }
