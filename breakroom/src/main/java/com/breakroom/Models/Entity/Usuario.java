@@ -28,6 +28,9 @@ public class Usuario {
     @Column(name="Nombre")
     private String nombre;
     
+    @Column(name = "avatar")
+    private String avatar;
+    
     public Usuario(Long id) {
         this.id = id;
     }

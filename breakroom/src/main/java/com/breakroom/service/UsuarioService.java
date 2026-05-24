@@ -15,4 +15,7 @@ public interface UsuarioService {
     void cambiarPassword(String email, String username, String password);
 	
     Long obtenerIdPorUsername(String username);
+    
+    UsuarioDto obtenerPerfil(Long id);
+    void actualizarAvatar(Long id, String nuevoAvatar);
 }

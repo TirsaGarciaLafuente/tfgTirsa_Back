@@ -14,5 +14,7 @@ public class UsuarioDto {
     private String email;
     
     private String nombre;
+    
+    private String avatar;
 
 }
