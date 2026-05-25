@@ -47,6 +47,8 @@ public class MensajeServiceImpl implements MensajeService {
     private MensajeDto mapearADto(Mensaje mensaje) {
         MensajeDto dto = new MensajeDto();
         dto.setId(mensaje.getId());
+        dto.setIdUsuario(mensaje.getAutor().getId());
+        dto.setAvatar(mensaje.getAutor().getAvatar());
         dto.setTexto(mensaje.getTexto());
         dto.setFechaEnvio(mensaje.getFechaEnvio());
         dto.setNombreAutor(mensaje.getAutor().getNombre()); 

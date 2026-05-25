@@ -65,4 +65,19 @@ public class SalaController {
         SalaDto sala = salaService.obtenerPorId(id);
         return ResponseEntity.ok(sala);
     }
+    
+    /**
+     * Permite a un usuario abandonar una sala. Si es el último, la sala se borra.
+     * Endpoint: DELETE /api/salas/{salaId}/abandonar
+     */
+    @DeleteMapping("/{salaId}/abandonar")
+    public ResponseEntity<?> abandonarSala(@PathVariable Long salaId, @RequestHeader("Authorization") String authHeader) {
+        try {
+            Long usuarioId = jwtUtil.extraerId(authHeader);
+            salaService.abandonarSala(salaId, usuarioId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al abandonar la sala: " + e.getMessage());
+        }
+    }
 }

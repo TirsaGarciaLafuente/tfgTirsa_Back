@@ -20,10 +20,10 @@ import java.util.stream.Collectors;
 public class SalaServiceImpl implements SalaService{
 
 	@Autowired
-    private  SalaRepository salaRepository;
+    private SalaRepository salaRepository;
 	
 	@Autowired
-    private  UsuarioRepository usuarioRepository;
+    private UsuarioRepository usuarioRepository;
 
     @Transactional
     @Override
@@ -82,6 +82,39 @@ public class SalaServiceImpl implements SalaService{
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public SalaDto obtenerPorId(Long id) {
+        // 1. Buscamos la sala por ID
+        Sala sala = salaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Sala no encontrada con ID: " + id));
+
+        // 2. Reutilizamos tu método mapearADto para devolver el DTO
+        return mapearADto(sala);
+    }
+
+    // NUEVO MÉTODO: Lógica para eliminar la relación entre el usuario y la sala
+    @Transactional
+    @Override
+    public void abandonarSala(Long salaId, Long usuarioId) {
+        // 1. Buscar la sala
+        Sala sala = salaRepository.findById(salaId)
+                .orElseThrow(() -> new RuntimeException("Sala no encontrada con ID: " + salaId));
+
+        // 2. Buscar al usuario
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
+
+        // 3. Quitar al usuario de la lista de miembros
+        sala.getMiembros().remove(usuario);
+
+        // 4. Si la sala se queda vacía, se elimina. Si no, se guardan los cambios.
+        if (sala.getMiembros().isEmpty()) {
+            salaRepository.delete(sala);
+        } else {
+            salaRepository.save(sala);
+        }
+    }
+
     // Método auxiliar para generar códigos tipo "XJ92L1"
     private String generarCodigoUnico() {
         return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
@@ -103,7 +136,6 @@ public class SalaServiceImpl implements SalaService{
                     uDto.setId(usuario.getId());
                     uDto.setNombre(usuario.getNombre());
                     uDto.setEmail(usuario.getEmail());
-                    // Si tu UsuarioDto tiene un setUsername, puedes añadirlo aquí si lo necesitas
                     return uDto;
                 })
                 .collect(Collectors.toList());
@@ -112,15 +144,5 @@ public class SalaServiceImpl implements SalaService{
         }
         
         return dto;
-    }
-    
-    @Override
-    public SalaDto obtenerPorId(Long id) {
-        // 1. Buscamos la sala por ID
-        Sala sala = salaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Sala no encontrada con ID: " + id));
-
-        // 2. Reutilizamos tu método mapearADto para devolver el DTO
-        return mapearADto(sala);
     }
 }

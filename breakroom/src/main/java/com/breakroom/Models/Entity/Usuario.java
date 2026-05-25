@@ -1,5 +1,7 @@
 package com.breakroom.Models.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,6 +21,7 @@ public class Usuario {
     @Column(name="Username", unique = true, nullable = false, length = 50)
     private String username;
 
+    @JsonIgnore
     @Column(name="Password", nullable = false, length = 250)
     private String password;
 

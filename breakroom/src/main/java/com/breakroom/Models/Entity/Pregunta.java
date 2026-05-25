@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "preguntas")
 @Data
@@ -27,6 +29,7 @@ public class Pregunta {
     private Usuario creador;
 
     // Relación: Muchas preguntas pertenecen a la misma Sala
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "sala_id")
     private Sala sala;
