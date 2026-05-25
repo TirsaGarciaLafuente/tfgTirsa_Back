@@ -17,6 +17,6 @@ public interface VotoRepository extends JpaRepository<Voto, Long> {
     long countByPreguntaId(Long preguntaId);
 
     // 2. Agrupa y cuenta los votos recibidos por cada compañero (para la gráfica)
-    @Query("SELECT v.votado.nombre, COUNT(v) FROM Voto v WHERE v.pregunta.id = :preguntaId GROUP BY v.votado.nombre")
+    @Query("SELECT v.votado.nombre, v.votado.avatar, COUNT(v) FROM Voto v WHERE v.pregunta.id = :preguntaId GROUP BY v.votado.nombre, v.votado.avatar")
     List<Object[]> obtenerRecuentoPorPregunta(@Param("preguntaId") Long preguntaId);
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class ResultadoVotacionDto {
     private String nombre;
+    private String avatar;
     private Long votos;
     private Double porcentaje;
 }

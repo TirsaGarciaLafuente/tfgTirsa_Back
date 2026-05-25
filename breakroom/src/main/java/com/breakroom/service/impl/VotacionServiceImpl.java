@@ -100,7 +100,8 @@ public class VotacionServiceImpl implements VotacionService {
         // 3. Transformamos esos datos brutos en nuestro DTO limpio con el porcentaje exacto
         return resultadosBrutos.stream().map(obj -> {
             String nombre = (String) obj[0];
-            Long votos = (Long) obj[1];
+            String avatar = (String) obj[1];
+            Long votos = (Long) obj[2];
             
             // Regla de tres simple: (votos / total) * 100
             Double porcentaje = totalVotos > 0 ? (votos * 100.0) / totalVotos : 0.0;
@@ -108,7 +109,7 @@ public class VotacionServiceImpl implements VotacionService {
             // Redondeamos a 1 decimal para que quede estético en Angular
             porcentaje = Math.round(porcentaje * 10.0) / 10.0;
             
-            return new ResultadoVotacionDto(nombre, votos, porcentaje);
+            return new ResultadoVotacionDto(nombre, avatar, votos, porcentaje);
         }).collect(Collectors.toList());
     }
 }
