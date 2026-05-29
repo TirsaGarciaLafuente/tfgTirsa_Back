@@ -11,7 +11,6 @@ import com.breakroom.Models.Entity.Usuario;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
 	
-	//Query creada por JPA por nombre
 	Usuario findByUsernameAndPassword(String username, String password);
 	
 	boolean existsByEmailAndUsername(String email, String username);

@@ -11,54 +11,60 @@ import com.breakroom.Models.DTO.SalaDto;
 import com.breakroom.security.JwtUtil;
 import com.breakroom.service.SalaService;
 
+/**
+ * Controlador que gestiona los espacios virtuales de reunión (salas),
+ * controlando la creación, acceso y abandono de los usuarios en ellas.
+ */
 @RestController 
 @RequestMapping("/api/salas") 
 public class SalaController {
-	
-	@Autowired
-	private SalaService salaService;
-	
-	@Autowired
-	private JwtUtil jwtUtil;
+    
+    @Autowired
+    private SalaService salaService;
+    
+    @Autowired
+    private JwtUtil jwtUtil;
 
     /**
-     * Crea una nueva sala y asigna al usuario como creador/miembro.
-     * @param nombre El nombre que se le quiera dar a la sala.
-     * @param usuarioId El ID del usuario que la crea.
+     * Crea un nuevo espacio o sala y añade al creador directamente como su primer miembro.
+     * * @param nombre El nombre asignado para identificar la sala.
+     * @param authHeader Cabecera de autorización que contiene el token JWT para identificar al creador.
+     * @return Respuesta con los datos de la sala recién creada en formato DTO.
      */
-	@PostMapping("/crear")
-    public ResponseEntity<SalaDto> crear(@RequestParam String nombre, @RequestHeader("Authorization") String authHeader) {	
-        // Llamamos al servicio que gestiona la lógica de creación y código único
-		Long usuarioId = jwtUtil.extraerId(authHeader);
+    @PostMapping("/crear")
+    public ResponseEntity<SalaDto> crear(@RequestParam String nombre, @RequestHeader("Authorization") String authHeader) {  
+        Long usuarioId = jwtUtil.extraerId(authHeader);
         return ResponseEntity.ok(salaService.crearSala(nombre, usuarioId));
     }
 
     /**
-     * Permite a un usuario unirse a una sala existente mediante su código de invitación.
-     * @param codSala Código de 6 caracteres (ej: AB1234).
-     * @param usuarioId ID del usuario que se quiere unir.
+     * Permite a un usuario incorporarse a una sala utilizando su código único de invitación.
+     * * @param codSala Código alfanumérico que identifica la sala a la que se desea ingresar.
+     * @param authHeader Cabecera de autorización que contiene el token JWT para identificar al usuario que se une.
+     * @return Respuesta con los datos de la sala actualizada en formato DTO.
      */
     @PostMapping("/unirse")
     public ResponseEntity<SalaDto> unirse(@RequestParam String codSala, @RequestHeader("Authorization") String authHeader) {
-    	Long usuarioId = jwtUtil.extraerId(authHeader);
-        // El servicio validará si la sala existe y si hay menos de 5 miembros
+        Long usuarioId = jwtUtil.extraerId(authHeader);
         return ResponseEntity.ok(salaService.unirseConCodigo(codSala, usuarioId));
     }
 
     /**
-     * Obtiene todas las salas a las que pertenece un usuario.
-     * Endpoint: GET /api/salas/usuario/1
+     * Devuelve el listado completo de salas en las que participa el usuario que hace la solicitud.
+     * * @param authHeader Cabecera de autorización que contiene el token JWT para saber de qué usuario se trata.
+     * @return Respuesta con la lista de salas asociadas en formato DTO.
      */
     @GetMapping("/usuario")
     public ResponseEntity<List<SalaDto>> listarPorUsuario(@RequestHeader("Authorization") String authHeader) {
-    	Long usuarioId = jwtUtil.extraerId(authHeader);
+        Long usuarioId = jwtUtil.extraerId(authHeader);
         List<SalaDto> salas = salaService.listarSalasPorUsuario(usuarioId);
         return ResponseEntity.ok(salas);
     }
     
     /**
-     * Obtiene los detalles de una sala específica por su ID.
-     * Endpoint: GET /api/salas/1
+     * Recupera la información detallada de una sala concreta utilizando su identificador.
+     * * @param id Identificador único de la sala solicitada.
+     * @return Respuesta con los datos detallados de la sala en formato DTO.
      */
     @GetMapping("/{id}")
     public ResponseEntity<SalaDto> obtenerPorId(@PathVariable Long id) {
@@ -67,8 +73,10 @@ public class SalaController {
     }
     
     /**
-     * Permite a un usuario abandonar una sala. Si es el último, la sala se borra.
-     * Endpoint: DELETE /api/salas/{salaId}/abandonar
+     * Tramita la salida de un usuario de una sala. Si la sala se queda vacía, se eliminará del sistema.
+     * * @param salaId Identificador de la sala que el usuario desea dejar.
+     * @param authHeader Cabecera de autorización que contiene el token JWT para identificar al usuario que se marcha.
+     * @return Estado 200 OK si se procesa la salida, o un estado Bad Request con el mensaje de error correspondiente.
      */
     @DeleteMapping("/{salaId}/abandonar")
     public ResponseEntity<?> abandonarSala(@PathVariable Long salaId, @RequestHeader("Authorization") String authHeader) {

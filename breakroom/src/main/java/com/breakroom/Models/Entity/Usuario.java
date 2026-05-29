@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class Usuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-incrementable
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
     private Long id;
 
     @Column(name="Username", unique = true, nullable = false, length = 50)
@@ -39,8 +39,6 @@ public class Usuario {
 
     @Column(length = 500)
     private String descripcion;
-
-    // Recuerda generar los getters y setters correspondientes
     
     public Usuario(Long id) {
         this.id = id;

@@ -10,6 +10,5 @@ public interface SalaService {
     public List<SalaDto> listarSalasPorUsuario(Long usuarioId);
     public SalaDto obtenerPorId(Long id);
     
-    // Nuevo método para abandonar la sala
     public void abandonarSala(Long salaId, Long usuarioId);
 }

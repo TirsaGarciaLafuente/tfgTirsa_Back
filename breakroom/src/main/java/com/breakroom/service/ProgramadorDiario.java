@@ -26,17 +26,15 @@ public class ProgramadorDiario {
     @Autowired
     private PreguntaRepository preguntaRepository;
 
-    // Se ejecuta automáticamente a las 00:00 (medianoche) todos los días
+    // Se ejecuta automáticamente a las 00:00 todos los días
     @Scheduled(cron = "0 0 0 * * ?")
     public void generarPreguntaDelDia() {
         List<PreguntaPlantilla> plantillas = plantillaRepository.findAll();
         
-        // Si el banco de preguntas está vacío, no hace nada
         if (plantillas.isEmpty()) {
             return;
         }
 
-        // Elegir una plantilla al azar
         Random random = new Random();
         PreguntaPlantilla elegida = plantillas.get(random.nextInt(plantillas.size()));
 
@@ -44,7 +42,6 @@ public class ProgramadorDiario {
         LocalDate hoy = LocalDate.now();
 
         for (Sala sala : salas) {
-            // Comprueba si la sala ya tiene una pregunta asignada hoy
             boolean existe = preguntaRepository.findBySalaIdAndFechaActiva(sala.getId(), hoy).isPresent();
             
             if (!existe) {
@@ -52,7 +49,7 @@ public class ProgramadorDiario {
                 nuevaPregunta.setTexto(elegida.getTexto());
                 nuevaPregunta.setSala(sala);
                 nuevaPregunta.setFechaActiva(hoy);
-                nuevaPregunta.setCreador(null); // La pregunta es automática, no tiene creador
+                nuevaPregunta.setCreador(null); 
 
                 preguntaRepository.save(nuevaPregunta);
             }

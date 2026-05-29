@@ -15,6 +15,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+/**
+ * Filtro de seguridad que se ejecuta en cada petición HTTP entrante para interceptar,
+ * validar y procesar los tokens JWT incluidos en las cabeceras.
+ */
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -24,23 +28,29 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private UserDetailsService userDetailsService;
 
+    /**
+     * Intercepta la petición HTTP para extraer el token JWT, validar la identidad del usuario 
+     * y configurar el contexto de seguridad si las credenciales son válidas.
+     * * @param request Objeto que contiene la información de la petición HTTP.
+     * @param response Objeto para gestionar la respuesta HTTP.
+     * @param chain Cadena de filtros de seguridad por los que debe pasar la petición.
+     * @throws ServletException Si ocurre un error en el contenedor de servlets.
+     * @throws IOException Si ocurre un error de lectura o escritura de datos.
+     */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // 1. Extraer el encabezado Authorization
         final String authorizationHeader = request.getHeader("Authorization");
 
         String username = null;
         String jwt = null;
 
-        // 2. Comprobar si trae el token con el prefijo "Bearer "
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             username = jwtUtil.extraerUsuario(jwt);
         }
 
-        // 3. Validar el token y establecer la sesión en Spring Security
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
 
@@ -52,7 +62,6 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         
-        // 4. Continuar con la petición
         chain.doFilter(request, response);
     }
 }

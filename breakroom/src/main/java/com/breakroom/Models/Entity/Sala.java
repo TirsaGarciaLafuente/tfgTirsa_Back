@@ -3,9 +3,9 @@ package com.breakroom.Models.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList; // Añade este import
+import java.util.ArrayList; 
 import java.util.HashSet;
-import java.util.List;    // Añade este import
+import java.util.List;    
 import java.util.Set;
 
 @Entity
@@ -39,7 +39,6 @@ public class Sala {
     @Builder.Default
     private Set<Usuario> miembros = new HashSet<>();
 
-    // RELACIÓN BIEN MAPEADA: Usamos List para evitar problemas con @Data de Pregunta
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "sala", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Pregunta> preguntas = new ArrayList<>();

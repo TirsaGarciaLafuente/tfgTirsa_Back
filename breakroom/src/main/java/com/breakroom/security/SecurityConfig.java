@@ -17,6 +17,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.Arrays;
+
+/**
+ * Clase de configuración principal para la seguridad de la aplicación.
+ * Define las reglas de acceso a las rutas, la política de sesiones sin estado,
+ * la configuración de CORS y la integración del filtro JWT.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -24,56 +30,70 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    /**
+     * Configura la cadena de filtros de seguridad para las peticiones HTTP, 
+     * estableciendo qué rutas son públicas y cuáles requieren autenticación.
+     * * @param http Objeto para estructurar la configuración de seguridad web.
+     * @return La cadena de filtros de seguridad completamente configurada.
+     * @throws Exception Si ocurre un error durante el proceso de configuración.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Nueva sintaxis para activar CORS usando los valores por defecto
             .cors(Customizer.withDefaults()) 
             
-            // 2. Nueva sintaxis para desactivar CSRF mediante función lambda
             .csrf(csrf -> csrf.disable()) 
             
-            // 3. Reglas de autorización de rutas
             .authorizeHttpRequests(auth -> auth
-            	    .requestMatchers("/api/auth/**").permitAll()
-            	    .requestMatchers("/error").permitAll() // Permite que Spring devuelva el error real
-            	    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() // Asegura que el preflight pase
-            	    .anyRequest().authenticated()
-            	)
-            // 4. Configuración de sesiones sin estado (Stateless)
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/error").permitAll() 
+                    .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll() 
+                    .anyRequest().authenticated()
+                )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
             );
 
-        // Coloca tu filtro JWT antes del filtro estándar de Spring
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
+    /**
+     * Define el sistema de encriptación de contraseñas de la aplicación utilizando BCrypt.
+     * * @return Instancia de PasswordEncoder configurada con BCrypt.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Configura y expone el gestor de autenticación encargado de validar las credenciales de los usuarios.
+     * * @param config Configuración global de autenticación de Spring.
+     * @return El objeto AuthenticationManager listo para ser usado por los controladores o servicios.
+     * @throws Exception Si no se puede recuperar el gestor de autenticación.
+     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
     
+    /**
+     * Define la política global de CORS, especificando qué orígenes, métodos 
+     * y cabeceras están permitidos para las peticiones entrantes.
+     * * @return El origen de configuración CORS configurado para la aplicación.
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permite las peticiones desde tu frontend de Angular
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200")); 
-        // Permite todos los métodos necesarios, especialmente OPTIONS para el preflight
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); 
-        // Permite enviar y recibir el token y el tipo de contenido
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); 
-        configuration.setAllowCredentials(true); // Necesario si manejas credenciales o tokens
+        configuration.setAllowCredentials(true); 
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration); // Aplica a todas las rutas
+        source.registerCorsConfiguration("/**", configuration); 
         return source;
     }
 }

@@ -21,6 +21,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controlador encargado de gestionar los procesos de autenticación, 
+ * registro y recuperación de credenciales de los usuarios.
+ */
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -40,6 +44,11 @@ public class AuthController {
     @Autowired
     private UsuarioRepository usuarioRepository;
     
+    /**
+     * Autentica a un usuario con sus credenciales y genera un token JWT si son correctas.
+     * * @param loginRequest Objeto con el nombre de usuario y contraseña.
+     * @return Respuesta con el token JWT si tiene éxito, o un mensaje de error si falla.
+     */
     @PostMapping("/login")
     public ResponseEntity<?> createAuthenticationToken(@RequestBody LoginRequest loginRequest) {
         
@@ -55,34 +64,46 @@ public class AuthController {
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
         
-        // Recuperamos la entidad real del usuario para sacar su ID
         Usuario usuario = usuarioRepository.findByUsername(loginRequest.getUsername());
 
-        // Le pasamos tanto el username como el ID para generar el token
         final String jwt = jwtUtil.generarToken(userDetails.getUsername(), usuario.getId());
 
         return ResponseEntity.ok(new AuthResponse(jwt));
     }
     
-	
-	@PostMapping("/registro")
-    public ResponseEntity<UsuarioDto> registro(@RequestBody RegistroDto registro) {	
+    /**
+     * Registra un nuevo usuario en el sistema.
+     * * @param registro Objeto con los datos del nuevo usuario.
+     * @return El usuario creado en formato DTO.
+     */
+    @PostMapping("/registro")
+    public ResponseEntity<UsuarioDto> registro(@RequestBody RegistroDto registro) { 
         return ResponseEntity.ok(usuarioService.registro(registro));
     }
-	
-	@PostMapping("/verificar")
-	public ResponseEntity<?> verificarUsuario(@RequestBody VerificarDto dto) {
-	    boolean existe = usuarioService.verificarUsuario(dto.getEmail(), dto.getUsername());
-	    if (existe) {
-	        return ResponseEntity.ok().build();
-	    } else {
-	        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-	    }
-	}
-	
-	@PostMapping("/cambiar-password")
-	public ResponseEntity<?> cambiarPassword(@RequestBody CambiarPasswordDto dto) {
-	    usuarioService.cambiarPassword(dto.getEmail(), dto.getUsername(), dto.getPassword());
-	    return ResponseEntity.ok().build();
-	}
+    
+    /**
+     * Comprueba si existe un usuario registrado con el email y nombre de usuario indicados.
+     * * @param dto Objeto que contiene el email y el username a comprobar.
+     * @return Estado 200 OK si el usuario existe, o 404 NOT FOUND si no coincide.
+     */
+    @PostMapping("/verificar")
+    public ResponseEntity<?> verificarUsuario(@RequestBody VerificarDto dto) {
+        boolean existe = usuarioService.verificarUsuario(dto.getEmail(), dto.getUsername());
+        if (existe) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+    
+    /**
+     * Modifica la contraseña de un usuario tras validar su identidad.
+     * * @param dto Objeto con las credenciales de validación y la nueva contraseña.
+     * @return Estado 200 OK tras actualizar la contraseña de forma correcta.
+     */
+    @PostMapping("/cambiar-password")
+    public ResponseEntity<?> cambiarPassword(@RequestBody CambiarPasswordDto dto) {
+        usuarioService.cambiarPassword(dto.getEmail(), dto.getUsername(), dto.getPassword());
+        return ResponseEntity.ok().build();
+    }
 }

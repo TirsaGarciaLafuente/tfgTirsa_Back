@@ -2,10 +2,10 @@ package com.breakroom;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling; // 1. Añadimos esta importación
+import org.springframework.scheduling.annotation.EnableScheduling; 
 
 @SpringBootApplication
-@EnableScheduling // 2. Añadimos esta anotación
+@EnableScheduling 
 public class BreakroomApplication {
 
 	public static void main(String[] args) {

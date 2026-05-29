@@ -1,6 +1,5 @@
 package com.breakroom.Models.Entity;
 
-// Importaciones de JPA (Si usas Spring Boot 2, cambia 'jakarta' por 'javax')
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -10,7 +9,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
 
-// Importación para la fecha
 import java.time.LocalDateTime;
 
 @Entity
@@ -34,11 +32,9 @@ public class Galeria {
     @JoinColumn(name = "sala_id")
     private Sala sala;
 
-    // Constructor vacío obligatorio para JPA
     public Galeria() {
     }
 
-    // --- Getters y Setters ---
 
     public Long getId() {
         return id;

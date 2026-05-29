@@ -13,6 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * Controlador que gestiona el sistema de votaciones diarias dentro de las salas,
+ * permitiendo consultar preguntas, emitir votos y ver los resultados.
+ */
 @RestController
 @RequestMapping("/api/votaciones")
 public class VotacionController {
@@ -23,6 +27,11 @@ public class VotacionController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    /**
+     * Recupera la pregunta asignada para el día de hoy en una sala específica.
+     * * @param salaId Identificador de la sala de la cual se quiere obtener la pregunta.
+     * @return Respuesta con los datos de la pregunta si existe, o un mensaje indicando que no se ha generado ninguna.
+     */
     @GetMapping("/pregunta-del-dia/{salaId}")
     public ResponseEntity<?> obtenerPreguntaDelDia(@PathVariable Long salaId) {
         Optional<Pregunta> pregunta = votacionService.obtenerPreguntaDelDia(salaId);
@@ -33,6 +42,12 @@ public class VotacionController {
         }
     }
 
+    /**
+     * Registra el voto de un usuario hacia otro para una pregunta determinada.
+     * * @param payload Objeto DTO que contiene el ID de la pregunta y el ID del usuario votado.
+     * @param authHeader Cabecera de autorización con el token JWT del usuario que vota.
+     * @return Respuesta confirmando el registro del voto, o un estado de error si no se pudo procesar.
+     */
     @PostMapping("/votar")
     public ResponseEntity<?> votar(
             @RequestBody VotoRequestDto payload,
@@ -52,13 +67,18 @@ public class VotacionController {
         }
     }
     
+    /**
+     * Comprueba si el usuario conectado ya ha participado en la votación de una pregunta concreta.
+     * * @param preguntaId Identificador de la pregunta que se desea verificar.
+     * @param authHeader Cabecera de autorización que contiene el token JWT del usuario.
+     * @return Respuesta con un valor booleano en la clave "haVotado", o un estado 401 si el token falla.
+     */
     @GetMapping("/verificar-voto/{preguntaId}")
     public ResponseEntity<?> verificarVoto(
             @PathVariable Long preguntaId,
             @RequestHeader("Authorization") String authHeader) {
         
         try {
-            // Aplicamos la misma limpieza de seguridad
             String headerLimpio = authHeader.replaceAll("[^a-zA-Z0-9\\-_\\.\\s]", "");
             
             Long usuarioId = jwtUtil.extraerId(headerLimpio);
@@ -72,7 +92,11 @@ public class VotacionController {
         }
     }
 
-    // NUEVO ENDPOINT PARA LA GRÁFICA
+    /**
+     * Obtiene el recuento y las estadísticas de votos de una pregunta para poder mostrarlos en una gráfica.
+     * * @param preguntaId Identificador de la pregunta de la que se quieren los resultados.
+     * @return Respuesta con la lista de los resultados detallados en formato DTO.
+     */
     @GetMapping("/resultados/{preguntaId}")
     public ResponseEntity<List<ResultadoVotacionDto>> obtenerResultados(@PathVariable Long preguntaId) {
         List<ResultadoVotacionDto> resultados = votacionService.obtenerResultados(preguntaId);

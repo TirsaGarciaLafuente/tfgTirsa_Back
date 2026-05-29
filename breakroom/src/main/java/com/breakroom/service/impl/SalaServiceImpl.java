@@ -16,98 +16,117 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Implementación del servicio de salas que gestiona el ciclo de vida de los espacios virtuales,
+ * incluyendo la creación, el acceso mediante invitaciones y la salida de los participantes.
+ */
 @Service
 public class SalaServiceImpl implements SalaService{
 
-	@Autowired
+    @Autowired
     private SalaRepository salaRepository;
-	
-	@Autowired
+    
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
+    /**
+     * Registra una nueva sala en el sistema, genera su código de invitación alfanumérico
+     * y añade al usuario creador como primer miembro participante.
+     * * @param nombre El nombre descriptivo asignado a la sala.
+     * @param usuarioId Identificador del usuario que crea el espacio.
+     * @return Los datos de la nueva sala estructurados en formato DTO.
+     * @throws RuntimeException Si el identificador del usuario no corresponde a ninguno registrado.
+     */
     @Transactional
     @Override
     public SalaDto crearSala(String nombre, Long usuarioId) {
-        // 1. Buscamos al usuario que crea la sala
         Usuario creador = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
 
-        // 2. Creamos la nueva entidad Sala
         Sala nuevaSala = Sala.builder()
                 .nombre(nombre)
-                .codSala(generarCodigoUnico()) // Generamos el código
+                .codSala(generarCodigoUnico()) 
                 .build();
 
-        // 3. Añadimos al creador a la lista de miembros
         nuevaSala.getMiembros().add(creador);
 
-        // 4. Guardamos en la base de datos
         Sala salaGuardada = salaRepository.save(nuevaSala);
 
-        // 5. Devolvemos el DTO
         return mapearADto(salaGuardada);
     }
 
+    /**
+     * Incorpora a un usuario dentro de una sala validando su código de acceso
+     * y comprobando que no se supere el límite de aforo permitido.
+     * * @param codSala Código único de 6 caracteres asignado a la sala.
+     * @param usuarioId Identificador del usuario que solicita el ingreso.
+     * @return Los datos actualizados de la sala con el nuevo miembro incorporado.
+     * @throws RuntimeException Si el código es erróneo, la sala está al límite de capacidad o el usuario no existe.
+     */
     @Transactional
     @Override
     public SalaDto unirseConCodigo(String codSala, Long usuarioId) {
-        // 1. Buscamos la sala por su código
         Sala sala = salaRepository.findByCodSala(codSala)
                 .orElseThrow(() -> new RuntimeException("El código de sala no existe"));
 
-        // --> RESTRICCIÓN DE AFORO <--
         if (sala.getMiembros().size() >= 8) {
             throw new RuntimeException("La sala ya está llena");
         }
 
-        // 2. Buscamos al usuario que quiere entrar
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 3. Añadimos el usuario a la sala
         sala.getMiembros().add(usuario);
 
-        // 4. Guardamos los cambios y devolvemos DTO
         return mapearADto(salaRepository.save(sala));
     }
     
+    /**
+     * Localiza y devuelve todas las salas activas en las que participa un usuario concreto.
+     * * @param usuarioId Identificador único del usuario a consultar.
+     * @return Una lista con las salas asociadas transformadas a formato DTO.
+     */
      @Override
     public List<SalaDto> listarSalasPorUsuario(Long usuarioId) {
-        // 1. Buscamos todas las salas vinculadas a ese ID de usuario
         List<Sala> salas = salaRepository.findByMiembros_Id(usuarioId);
         
-        // 2. Convertimos la lista de entidades a DTOs usando Stream
         return salas.stream()
                 .map(this::mapearADto)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Busca y obtiene la información de una sala específica mediante su identificador único.
+     * * @param id Identificador de la sala requerida.
+     * @return Los datos de la sala mapeados a formato DTO.
+     * @throws RuntimeException Si no existe ninguna sala asociada a ese identificador.
+     */
     @Override
     public SalaDto obtenerPorId(Long id) {
-        // 1. Buscamos la sala por ID
         Sala sala = salaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sala no encontrada con ID: " + id));
 
-        // 2. Reutilizamos tu método mapearADto para devolver el DTO
         return mapearADto(sala);
     }
 
-    // NUEVO MÉTODO: Lógica para eliminar la relación entre el usuario y la sala
+    /**
+     * Gestiona la baja de un miembro dentro de una sala. En caso de que sea el último
+     * participante restante, se procede a la eliminación definitiva de la sala.
+     * * @param salaId Identificador de la sala que se abandona.
+     * @param usuarioId Identificador del usuario que solicita la salida.
+     * @throws RuntimeException Si la sala o el usuario no existen en la base de datos.
+     */
     @Transactional
     @Override
     public void abandonarSala(Long salaId, Long usuarioId) {
-        // 1. Buscar la sala
         Sala sala = salaRepository.findById(salaId)
                 .orElseThrow(() -> new RuntimeException("Sala no encontrada con ID: " + salaId));
 
-        // 2. Buscar al usuario
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
 
-        // 3. Quitar al usuario de la lista de miembros
         sala.getMiembros().remove(usuario);
 
-        // 4. Si la sala se queda vacía, se elimina. Si no, se guardan los cambios.
         if (sala.getMiembros().isEmpty()) {
             salaRepository.delete(sala);
         } else {
@@ -115,12 +134,20 @@ public class SalaServiceImpl implements SalaService{
         }
     }
 
-    // Método auxiliar para generar códigos tipo "XJ92L1"
+    /**
+     * Genera un código alfanumérico aleatorio y único de 6 caracteres en mayúsculas.
+     * * @return Una cadena de texto corta y aleatoria.
+     */
     private String generarCodigoUnico() {
         return UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
-    // Convertimos la Entidad en DTO para el Frontend
+    /**
+     * Transfiere las propiedades de una entidad Sala a un objeto de transferencia SalaDto,
+     * adaptando también de forma interna la lista de miembros adjuntos.
+     * * @param sala Objeto de la entidad origen que se va a procesar.
+     * @return El objeto DTO equivalente preparado para su envío externo.
+     */
     private SalaDto mapearADto(Sala sala) {
         SalaDto dto = new SalaDto();
         dto.setId(sala.getId());
@@ -128,7 +155,6 @@ public class SalaServiceImpl implements SalaService{
         dto.setCodSala(sala.getCodSala());
         dto.setFechaCreacion(sala.getFechaCreacion());
         
-        // NUEVA LÓGICA: Mapeamos la lista de miembros de la entidad a UsuarioDto en el DTO
         if (sala.getMiembros() != null) {
             List<UsuarioDto> listaUsuariosDto = sala.getMiembros().stream()
                 .map(usuario -> {
