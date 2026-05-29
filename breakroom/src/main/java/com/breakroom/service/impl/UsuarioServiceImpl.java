@@ -112,4 +112,19 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setAvatar(nuevoAvatar);
         usuarioRepository.save(usuario);
     }
+    
+    @Override
+    public void actualizarPerfil(Long id, UsuarioDto usuarioDto) {
+        // 1. Buscamos el usuario por su ID
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        // 2. Actualizamos los campos recibidos desde el frontend
+        usuario.setNombre(usuarioDto.getNombre());
+        usuario.setTitulo(usuarioDto.getTitulo());
+        usuario.setDescripcion(usuarioDto.getDescripcion());
+        
+        // 3. Guardamos los cambios
+        usuarioRepository.save(usuario);
+    }
 }

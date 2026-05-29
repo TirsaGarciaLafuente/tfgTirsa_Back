@@ -37,4 +37,15 @@ public class UsuarioController {
         usuarioService.actualizarAvatar(usuarioId, nuevoAvatar);
         return ResponseEntity.ok("Avatar actualizado con éxito");
     }
+    
+ // Nuevo endpoint para actualizar datos de perfil (nombre, título, descripción)
+    @PutMapping("/perfil")
+    public ResponseEntity<String> actualizarPerfil(@RequestBody UsuarioDto usuarioDto, @RequestHeader("Authorization") String authHeader) {
+        Long usuarioId = jwtUtil.extraerId(authHeader);
+        
+        // Llamas al servicio para actualizar los datos
+        usuarioService.actualizarPerfil(usuarioId, usuarioDto);
+        
+        return ResponseEntity.ok("Perfil actualizado con éxito");
+    }
 }

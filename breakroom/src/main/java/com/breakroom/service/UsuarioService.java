@@ -18,4 +18,5 @@ public interface UsuarioService {
     
     UsuarioDto obtenerPerfil(Long id);
     void actualizarAvatar(Long id, String nuevoAvatar);
+    void actualizarPerfil(Long id, UsuarioDto usuarioDto);
 }
