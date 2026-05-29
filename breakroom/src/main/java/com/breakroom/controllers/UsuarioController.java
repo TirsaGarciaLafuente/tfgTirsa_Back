@@ -27,6 +27,12 @@ public class UsuarioController {
 		Long usuarioId = jwtUtil.extraerId(authHeader);
         return ResponseEntity.ok(usuarioService.obtenerPerfil(usuarioId));
     }
+    
+ // Endpoint para obtener el perfil de un usuario específico por su ID
+    @GetMapping("/perfil/{id}")
+    public ResponseEntity<UsuarioDto> obtenerPerfilPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.obtenerPerfil(id));
+    }
 
     // Endpoint para actualizar el avatar
     @PutMapping("/avatar")
