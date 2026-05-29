@@ -3,16 +3,32 @@ package com.breakroom.security;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
+	
 
-    private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     private static final long EXPIRATION_TIME = 86400000; // 1 día
+    
+    // Leemos la propiedad del application.properties
+    @Value("${jwt.secret}")
+    private String secretString;
+
+    private Key secretKey;
+
+    // Este método se ejecuta automáticamente justo después de que Spring lea el @Value
+    @PostConstruct
+    protected void init() {
+        this.secretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generarToken(String username, Long usuarioId) {
         return Jwts.builder()
@@ -20,13 +36,13 @@ public class JwtUtil {
                 .setSubject(username)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-                .signWith(SECRET_KEY)
+                .signWith(secretKey)
                 .compact();
     }
 
     public String extraerUsuario(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -43,7 +59,7 @@ public class JwtUtil {
         // Obtenemos el claim "id". Lo pedimos como Number porque JWT a veces
         // guarda los IDs pequeños como Integer en vez de Long
         Number id = Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -54,7 +70,7 @@ public class JwtUtil {
     
     private boolean tokenExpirado(String token) {
         Date expiracion = Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
+                .setSigningKey(secretKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()

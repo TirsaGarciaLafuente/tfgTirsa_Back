@@ -33,6 +33,14 @@ public class Usuario {
     
     @Column(name = "avatar")
     private String avatar;
+   
+    @Column(length = 100)
+    private String titulo;
+
+    @Column(length = 500)
+    private String descripcion;
+
+    // Recuerda generar los getters y setters correspondientes
     
     public Usuario(Long id) {
         this.id = id;

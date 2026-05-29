@@ -16,5 +16,8 @@ public class UsuarioDto {
     private String nombre;
     
     private String avatar;
-
+    
+    private String titulo;
+    
+    private String descripcion;
 }

@@ -50,7 +50,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         newUser.setEmail(registroDto.getEmail());
         newUser.setNombre(registroDto.getNombre());
         // El avatar por defecto puede ser null o una ruta por defecto
-        newUser.setAvatar("/assets/avatar-default.jpg"); 
+        newUser.setAvatar("/assets/default-avatar.jpg"); 
 
         UsuarioDto response = new UsuarioDto();
         try {
@@ -99,6 +99,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         dto.setNombre(user.getNombre());
         dto.setEmail(user.getEmail());
         dto.setAvatar(user.getAvatar());
+        dto.setTitulo(user.getTitulo());
+        dto.setDescripcion(user.getDescripcion());
         return dto;
     }
 
