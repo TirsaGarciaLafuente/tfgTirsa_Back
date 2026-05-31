@@ -19,7 +19,7 @@ public class Galeria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(columnDefinition = "LONGTEXT")
+    @Column(columnDefinition = "TEXT")
     private String imagenBase64;
 
     private LocalDateTime fechaCreacion = LocalDateTime.now();
